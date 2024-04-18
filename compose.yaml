@@ -1,0 +1,46 @@
+#version: "3.8"
+
+#Cada container é um service;
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:12.17
+    ports:
+      - 5432:5432
+    environment:
+        POSTGRES_PASSWORD: 1234
+        POSTGRES_USER: kubenews
+        POSTGRES_DB: kubenews
+    volumes:
+      #- ./postgres_vol:/var/lib/postgresql/data - tipo bind
+      -  postgre_docker_vol:/var/lib/postgresql/data
+    networks:
+      - kube_news_net
+  kubenews:
+    container_name: kubenews_container
+    image: leandromello99/kubenews
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - kube_news_net
+    environment:
+      DB_DATABASE: kubenews
+      DB_USERNAME: kubenews
+      DB_PASSWORD: 1234
+      DB_HOST: postgres
+    depends_on:
+      - postgres
+
+
+volumes:
+  postgre_docker_vol:
+    name: postgre_docker_vol
+networks:
+  kube_news_net:
+   name: knews_net
+   driver: bridge
+
+
